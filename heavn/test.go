@@ -11,10 +11,10 @@ import (
     "strconv"
     
     "image"
-	_ "image/color"
-	_ "image/gif"
-	_ "image/jpeg"
-	_ "image/png"
+    _ "image/color"
+    _ "image/gif"
+    _ "image/jpeg"
+    _ "image/png"
     
 )
 
@@ -22,57 +22,57 @@ var persons map[string]*Histogram
 
 
 func decode(filename string) (image.Image, string, error) {
-	f, err := os.Open(filename)
-	if err != nil {
-		return nil, "no image", err
-	}
-	defer f.Close()
-	rd := bufio.NewReader(f)
-	return image.Decode(rd)
+    f, err := os.Open(filename)
+    if err != nil {
+        return nil, "no image", err
+    }
+    defer f.Close()
+    rd := bufio.NewReader(f)
+    return image.Decode(rd)
 }
 
 func handle(m image.Image, r image.Rectangle) (mat *Matrix) {
-	i := 0
-	//~ mat = createMatrix(r.Max.X-r.Min.X,r.Max.Y-r.Max.Y)
-	mat = createMatrix(r.Max.X,r.Max.Y)
+    i := 0
+    //~ mat = createMatrix(r.Max.X-r.Min.X,r.Max.Y-r.Max.Y)
+    mat = createMatrix(r.Max.X,r.Max.Y)
     for y := r.Min.Y; y < r.Max.Y; y++ {
         for x := r.Min.X; x < r.Max.X; x++ {
-			r8,g8,b8,_ := m.At(x,y).RGBA()
-			mat.e[i] = uint8((r8>>2) + (g8>>1) + (b8>>2))
-			i += 1
-		}
-	}
-	return
+            r8,g8,b8,_ := m.At(x,y).RGBA()
+            mat.e[i] = uint8((r8>>2) + (g8>>1) + (b8>>2))
+            i += 1
+        }
+    }
+    return
 }
 func print(h *Histogram) {
-	n := 0
-	for k, v := range *h {
-		if v > 0 {
-			fmt.Printf("%3v %2v; ", k, v)
-			n += 1
-		}
-	}
-	fmt.Printf("(%d)\n", n)
+    n := 0
+    for k, v := range *h {
+        if v > 0 {
+            fmt.Printf("%3v %2v; ", k, v)
+            n += 1
+        }
+    }
+    fmt.Printf("(%d)\n", n)
 }
 
 
 func compare(match string, hist *Histogram) (best string, confidence float64) {
-	if hist==nil { return }
-	if len(persons)<2 { return }
-	best = ""
-	bd := 10000000.0
+    if hist==nil { return }
+    if len(persons)<2 { return }
+    best = ""
+    bd := 10000000.0
     mm := 0.00000001
-	for n,h := range persons {
-		if match == n { continue }
-		dist := norml2(h,hist)
+    for n,h := range persons {
+        if match == n { continue }
+        dist := norml2(h,hist)
         if dist < bd {
             bd = dist
             best = n
         }
         mm = math.Max(mm,dist)
-	}
-	confidence = 1.0-(bd/mm)
-	return 
+    }
+    confidence = 1.0-(bd/mm)
+    return 
 }
 
 
@@ -84,13 +84,13 @@ func main() {
 
 
     flag.Parse()
-	if flag.NArg() > 0 {
-		path = flag.Arg(0)
-	}
+    if flag.NArg() > 0 {
+        path = flag.Arg(0)
+    }
 
     an := "square"
-	if flag.NArg() > 1 {
-		an = flag.Arg(1)
+    if flag.NArg() > 1 {
+        an = flag.Arg(1)
     }
 
     var sample Sampler = square
@@ -102,7 +102,7 @@ func main() {
 
 
     var radius int = 2
-	if flag.NArg() > 2 {
+    if flag.NArg() > 2 {
         radius,_ = strconv.Atoi(flag.Arg(2))
     }
 
