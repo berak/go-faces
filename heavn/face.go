@@ -115,28 +115,28 @@ func rectbit(m *Matrix, pos int, cen uint8) (uint8) {
 func square2(m *Matrix, pos,radius int) (way uint8) {
     cen := m.e[pos]
     way = 0
-    way |= rectbit(m, pos-radius*m.w,            cen) << 0
-    way |= rectbit(m, pos-radius*m.w+radius-1,   cen) << 1
-    way |= rectbit(m, pos+radius-1,              cen) << 2
+    way |= rectbit(m, pos-radius*m.w,              cen) << 0
+    way |= rectbit(m, pos-radius*m.w+radius-1,     cen) << 1
+    way |= rectbit(m, pos+radius-1,                cen) << 2
     way |= rectbit(m, pos+(radius-1)*m.w+radius-1, cen) << 3
-    way |= rectbit(m, pos+(radius-1)*m.w,        cen) << 4
-    way |= rectbit(m, pos+(radius-1)*m.w-radius, cen) << 5
-    way |= rectbit(m, pos-radius,                cen) << 6
-    way |= rectbit(m, pos-radius*m.w-radius,     cen) << 7
+    way |= rectbit(m, pos+(radius-1)*m.w,          cen) << 4
+    way |= rectbit(m, pos+(radius-1)*m.w-radius,   cen) << 5
+    way |= rectbit(m, pos-radius,                  cen) << 6
+    way |= rectbit(m, pos-radius*m.w-radius,       cen) << 7
     return
 }
 // Sampler
 func circle2(m *Matrix, pos,radius int) (way uint8) {
     cen := m.e[pos]
     way = 0
-    way |= getbit( m, pos-radius*m.w,                 cen) << 0
-    way |= rectbit(m, pos-radius*m.w+(radius-1),    cen) << 1
-    way |= getbit( m, pos+radius,                     cen) << 2
-    way |= rectbit(m, pos+(radius-1)+(radius-1)*m.w,cen) << 3
-    way |= getbit( m, pos+radius*m.w,                 cen) << 4
-    way |= rectbit(m, pos-(radius)-(radius-1)*m.w,  cen) << 5
+    way |= getbit( m, pos-radius*m.w,                cen) << 0
+    way |= rectbit(m, pos-radius*m.w+(radius-1),     cen) << 1
+    way |= getbit( m, pos+radius,                    cen) << 2
+    way |= rectbit(m, pos+(radius-1)+(radius-1)*m.w, cen) << 3
+    way |= getbit( m, pos+radius*m.w,                cen) << 4
+    way |= rectbit(m, pos-(radius)-(radius-1)*m.w,   cen) << 5
     way |= getbit( m, pos-radius,                    cen) << 6
-    way |= rectbit(m, pos-radius-radius*m.w,        cen) << 7
+    way |= rectbit(m, pos-radius-radius*m.w,         cen) << 7
     return
 }
 

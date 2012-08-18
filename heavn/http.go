@@ -32,11 +32,11 @@ type Thumbnail struct {
 
 
 
-func handle(m image.Image, r image.Rectangle) (mat *Matrix) {
+func handleImage(m image.Image) (mat *Matrix) {
     i := 0
-    mat = createMatrix(r.Max.X-r.Min.X,r.Max.Y-r.Max.Y)
-    for y := r.Min.Y; y < r.Max.Y; y++ {
-        for x := r.Min.X; x < r.Max.X; x++ {
+    mat = createMatrix(90,90)
+    for y := 0; y < 90; y++ {
+        for x := 0; x < 90; x++ {
             r8,g8,b8,_ := m.At(x,y).RGBA()
             mat.e[i] = uint8((r8>>2) + (g8>>1) + (b8>>2))
             i += 1
@@ -44,37 +44,6 @@ func handle(m image.Image, r image.Rectangle) (mat *Matrix) {
     }
     return
 }
-
-func handleRGBA(m *image.RGBA) (mat *Matrix) {
-    i := 0
-    r := m.Bounds()
-    mat = createMatrix(r.Max.X,r.Max.Y)
-    for y := r.Min.Y; y < r.Max.Y; y++ {
-        pix := m.Pix[y*m.Stride:]
-        for x := r.Min.X; x < r.Max.X; x++ {
-            r8 := uint8(pix[x*4])
-            g8 := uint8(pix[x*4+1])
-            b8 := uint8(pix[x*4+2])
-            mat.e[i] = uint8((r8>>2) + (g8>>1) + (b8>>2))
-            i += 1
-        }
-    }
-    return
-}
-func handleYCbCr(m *image.YCbCr)  (mat *Matrix) {
-    i := 0
-    r := m.Bounds()
-    mat = createMatrix(r.Max.X,r.Max.Y)
-    for y := r.Min.Y; y < r.Max.Y; y++ {
-        for x := r.Min.X; x < r.Max.X; x++ {
-            r8,g8,b8,_ := m.At(x,y).RGBA()
-            mat.e[i] = uint8((r8>>2) + (g8>>1) + (b8>>2))
-            i += 1
-        }
-    }
-    return;
-}
-
 
 
 func fillDict(c appengine.Context) {
@@ -241,23 +210,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
             im, imtype, err := image.Decode(&buf)
             if err == nil {
                 b := im.Bounds()
-                //~ if v:=r.FormValue("x"); v!="" { if x,e := strconv.Atoi(v); e==nil { b.Min.X=x } }
-                //~ if v:=r.FormValue("y"); v!="" { if x,e := strconv.Atoi(v); e==nil { b.Min.Y=x } }
-                //~ if v:=r.FormValue("w"); v!="" { if x,e := strconv.Atoi(v); e==nil { b.Max.X=b.Min.X + x } }
-                //~ if v:=r.FormValue("h"); v!="" { if x,e := strconv.Atoi(v); e==nil { b.Max.Y=b.Min.Y + x } }
                 hr = fmt.Sprintf("%v %v %v", name,imtype, b)
                 c.Infof(hr)
                 im = Resize(im, b, 90, 90)
-                switch it := im.(type) {
-                case *image.RGBA:
-                    m = handleRGBA(im.(*image.RGBA))
-                    break
-                case *image.YCbCr:
-                    m = handleYCbCr(im.(*image.YCbCr))
-                    break
-                default:
-                    c.Warningf("can't resolve image type %v %v", it,imtype)
-                }
+                m  = handleImage( im )
                 if m != nil {
                     hist = m.histogram(circle, 1)
                     persons[name] = hist
@@ -306,23 +262,17 @@ func handler(w http.ResponseWriter, r *http.Request) {
     
     w.Header().Add("Content-Type", "text/html")
     fmt.Fprint(w, "<html><head> ", style, "<title></title></head><body>\n")
-    //~ fmt.Fprint(w, "<form method=POST enctype='multipart/form-data' onSubmit='postCanvasToURL()'>\n")
-    //~ fmt.Fprint(w, "<form action='#' onSubmit='postCanvasToURL()'>\n")
-    fmt.Fprint(w, "<table width='80%'><tr><td><table><tr><td><input size=40 id='n' name='n' title='your name here'></td>\n")
-    //~ fmt.Fprint(w, "<input size=90 name=i title='your image url here'><p>\n")
-    fmt.Fprint(w, "<td><input type=button value='Upload and match this image' id='submit' style='visibility:hidden;' onClick='postCanvasToURL()'></td></tr></table><p>\n")
-    //~ fmt.Fprint(w, "<td><input type=button value='Upload and match this image' id='submit' style='visibility:hidden;' onClick='upload()'></td></tr></table><p>\n")
-    fmt.Fprint(w, "<input size=60 name=f id='f' title='upload from disk' type=file onChange='loadim()'><p></td>\n")
+    fmt.Fprint(w, "<table width='80%'><tr>" )
+    fmt.Fprint(w, "<td><input size=40 id='n' name='n' title='give it a name'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n")
+    fmt.Fprint(w, "<input type=button value='Upload this image' id='submit' style='visibility:hidden;' onClick='postCanvasToURL()'><p>\n")
+    fmt.Fprint(w, "<input size=60 name='f' id='f' title='face detect' type=file onChange='loadim()'><p></td>\n")
+    //~ fmt.Fprint(w, "<td><div id=compout><br></div></td><td><a href='/' id='match' title='upload and match'><canvas id='can' width=90 height=90></a></td></tr></table>\n")
     fmt.Fprint(w, "<td><div id=compout><br></div></td><td><canvas id='can' width=90 height=90></td></tr></table>\n")
-    //~ fmt.Fprint(w, "<input type=hidden name='x'><p>\n")
-    //~ fmt.Fprint(w, "<input type=hidden name='y'><p>\n")
-    //~ fmt.Fprint(w, "<input type=hidden name='w'><p>\n")
-    //~ fmt.Fprint(w, "<input type=hidden name='h'><p>\n")
     fmt.Fprint(w, "<p><hr NOSHADE>\n")
     fmt.Fprint(w, compres, "<p><hr NOSHADE>", listDict(),"<p><hr NOSHADE>" )
     fmt.Fprint(w, "<script type='text/javascript' src='js/ccv.js'></script>\n")
     fmt.Fprint(w, "<script type='text/javascript' src='js/face.js'></script>\n")
     fmt.Fprint(w, "<script type='text/javascript' src='js/faceup.js'></script>")
-    fmt.Fprintf(w, "%v\n", hr)
+    fmt.Fprint(w, hr, "\n")
     fmt.Fprint(w, "</body></html>")
 }

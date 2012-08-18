@@ -1,6 +1,6 @@
 canvas = document.getElementById("can");
 ctx = canvas.getContext("2d");
-ctx.fillRect(0,0,50,50)
+ctx.fillRect(0,0,90,90)
 
 
 if (XMLHttpRequest.prototype.sendAsBinary === undefined) {
@@ -12,34 +12,23 @@ if (XMLHttpRequest.prototype.sendAsBinary === undefined) {
   };
 }
 
-//~ function upload() {
-	//~ var file = canvas.mozGetAsFile ? canvas.mozGetAsFile('image.jpg') :
-			   //~ atob( canvas.toDataURL('image/jpg').replace('data:image/jpg;base64,', '') )
-	//~ var formData = new FormData;
-	//~ formData.append("f",file);
-	//~ var xhr = new XMLHttpRequest;
-	//~ xhr.open('POST', "/", false);
-	//~ xhr.send(formData);
-//~ }
 
 function postCanvasToURL() {
 	document.getElementById("submit").style.visibility = "hidden"
-	var fn = document.getElementById("f").value
 	var type = "image/jpeg"
 	var data = canvas.toDataURL(type);
-	if ( ! data ) return false
+	if ( ! data ) return
 	data = data.replace('data:' + type + ';base64,', '');
 
 	var xhr = new XMLHttpRequest();
 	xhr.open('POST', "/", true);
-	xhr.onreadystatechange = function()
-	{
-		//if ( (http.readyState == 4) && (http.status == 200) )
-		//~ if ( (xhr.status == 200) )
-		{       
-			document.innerHTML = xhr.responseXML;
-		}
+	xhr.onreadystatechange = function()	{
+		if ( xhr.readyState < 4 )
+			document.getElementById("compout").innerHTML += xhr.readyState + " " + xhr.status + " " + "posting ..<br>"
+		else
+			document.innerHTML = xhr.responseText
 	}
+	var fn = document.getElementById("f").value
 	var boundary = 'ohaiimaboundary';
 	xhr.setRequestHeader('Content-Type', 'multipart/form-data; boundary=' + boundary);
 	xhr.sendAsBinary([
@@ -51,16 +40,15 @@ function postCanvasToURL() {
 		'--' + boundary,
 		''
 	].join('\r\n'));
-
-	return false
 }
 
 
 function loadim() {
+	document.getElementById("submit").style.visibility = "hidden"
+	var matchim = document.getElementById("f")
 	var co = document.getElementById("compout")
-	var fn = document.getElementById("f")
 	var image = new Image();
-	image.src = fn.files[0].getAsDataURL()
+	image.src = matchim.files[0].getAsDataURL()
 	image.onload = function () {
 		ctx.fillRect(0,0,90,90)
 
@@ -78,14 +66,9 @@ function loadim() {
 			if ( h + h/4 < 90 ) {
 				h += h/4
 			}
-			//~ if ( w + w/4 < 90 ) {
-				//~ w += w/4
-			//~ }
-			document.getElementById("submit").style.visibility = "visible"
 			co.innerHTML += "[" + x + "," + y + "," + w + "," + h + "]<br>\n"
 			ctx.drawImage(image, x,y,w,h, 0,0,90,90);
-		} else {
-			document.getElementById("submit").style.visibility = "hidden"
+			document.getElementById("submit").style.visibility = "visible"
 		}
 	}	
 	image.onerror = function (e,url,line) {
