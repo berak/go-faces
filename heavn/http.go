@@ -195,14 +195,16 @@ func handler(w http.ResponseWriter, r *http.Request) {
     hr := ""
     var m *Matrix = nil
     var hist *Histogram = nil
-    
-    name := r.FormValue("n");
+
+    fromAjax := false
+    name := r.FormValue("n")
     if _,e := persons[name]; e {
         hist = persons[name]
     } else {
         f, fhead, err := r.FormFile("f")
         if err == nil {
             defer f.Close()
+            fromAjax = true;
             if name=="" { name = fmt.Sprintf("%v",fhead)[2:12] }
             // Grab the image data
             var buf bytes.Buffer
@@ -261,18 +263,22 @@ func handler(w http.ResponseWriter, r *http.Request) {
     
     
     w.Header().Add("Content-Type", "text/html")
-    fmt.Fprint(w, "<html><head> ", style, "<title></title></head><body>\n")
-    fmt.Fprint(w, "<table width='80%'><tr>" )
-    fmt.Fprint(w, "<td><input size=40 id='n' name='n' title='give it a name'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n")
-    fmt.Fprint(w, "<input type=button value='Upload this image' id='submit' style='visibility:hidden;' onClick='postCanvasToURL()'><p>\n")
-    fmt.Fprint(w, "<input size=60 name='f' id='f' title='face detect' type=file onChange='loadim()'><p></td>\n")
-    //~ fmt.Fprint(w, "<td><div id=compout><br></div></td><td><a href='/' id='match' title='upload and match'><canvas id='can' width=90 height=90></a></td></tr></table>\n")
-    fmt.Fprint(w, "<td><div id=compout><br></div></td><td><canvas id='can' width=90 height=90></td></tr></table>\n")
-    fmt.Fprint(w, "<p><hr NOSHADE>\n")
-    fmt.Fprint(w, compres, "<p><hr NOSHADE>", listDict(),"<p><hr NOSHADE>" )
-    fmt.Fprint(w, "<script type='text/javascript' src='js/ccv.js'></script>\n")
-    fmt.Fprint(w, "<script type='text/javascript' src='js/face.js'></script>\n")
-    fmt.Fprint(w, "<script type='text/javascript' src='js/faceup.js'></script>")
-    fmt.Fprint(w, hr, "\n")
-    fmt.Fprint(w, "</body></html>")
+    if ( fromAjax ) {
+        fmt.Fprint(w, compres )
+    } else {
+        fmt.Fprint(w, "<html><head> ", style, "<title></title></head><body>\n")
+        fmt.Fprint(w, "<table width='80%'><tr>" )
+        fmt.Fprint(w, "<td><input size=40 id='n' name='n' title='give it a name'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n")
+        fmt.Fprint(w, "<input type=button value='Upload this image' id='submit' style='visibility:hidden;' onClick='postCanvasToURL()'><p>\n")
+        fmt.Fprint(w, "<input size=60 name='f' id='f' title='face detect' type=file onChange='loadim()'><p></td>\n")
+        //~ fmt.Fprint(w, "<td><div id=compout><br></div></td><td><a href='/' id='match' title='upload and match'><canvas id='can' width=90 height=90></a></td></tr></table>\n")
+        fmt.Fprint(w, "<td><div id=compout><br></div></td><td><canvas id='can' width=90 height=90></td></tr></table>\n")
+        fmt.Fprint(w, "<p><hr NOSHADE>\n")
+        fmt.Fprint(w, "<div id=compres>",compres, "<p></div><hr NOSHADE>", listDict(),"<p><hr NOSHADE>" )
+        fmt.Fprint(w, "<script type='text/javascript' src='js/ccv.js'></script>\n")
+        fmt.Fprint(w, "<script type='text/javascript' src='js/face.js'></script>\n")
+        fmt.Fprint(w, "<script type='text/javascript' src='js/faceup.js'></script>")
+        fmt.Fprint(w, hr, "\n")
+        fmt.Fprint(w, "</body></html>")
+    }
 }

@@ -12,6 +12,11 @@ if (XMLHttpRequest.prototype.sendAsBinary === undefined) {
   };
 }
 
+function createDocument(html) {
+    var doc = document.implementation.createDocument ('http://www.w3.org/1999/xhtml', 'html',  null);
+    doc.documentElement.innerHTML = html;
+    return doc;
+}
 
 function postCanvasToURL() {
 	document.getElementById("submit").style.visibility = "hidden"
@@ -23,10 +28,11 @@ function postCanvasToURL() {
 	var xhr = new XMLHttpRequest();
 	xhr.open('POST', "/", true);
 	xhr.onreadystatechange = function()	{
-		if ( xhr.readyState < 4 )
-			document.getElementById("compout").innerHTML += xhr.readyState + " " + xhr.status + " " + "posting ..<br>"
-		else
-			document.innerHTML = xhr.responseText
+		if ( xhr.readyState < 4 ) {
+			document.getElementById("compout").innerHTML = xhr.readyState + " " + xhr.status + " " + "posting ..<br>"
+		} else {
+			document.getElementById("compres").innerHTML = xhr.responseText
+		}
 	}
 	var fn = document.getElementById("f").value
 	var boundary = 'ohaiimaboundary';
