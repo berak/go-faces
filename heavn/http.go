@@ -268,7 +268,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
     } else {
         fmt.Fprint(w, "<html><head> ", style, "<title></title></head><body>\n")
         fmt.Fprint(w, "<table width='80%'><tr>" )
-        fmt.Fprint(w, "<td><input size=40 id='n' name='n' title='give it a name'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n")
+        fmt.Fprint(w, "<td><input size=40 id='n' name='n' title='give it a name' style='visibility:hidden;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n")
         fmt.Fprint(w, "<input type=button value='Upload this image' id='submit' style='visibility:hidden;' onClick='postCanvasToURL()'><p>\n")
         fmt.Fprint(w, "<input size=60 name='f' id='f' title='face detect' type=file onChange='loadim()'><p></td>\n")
         //~ fmt.Fprint(w, "<td><div id=compout><br></div></td><td><a href='/' id='match' title='upload and match'><canvas id='can' width=90 height=90></a></td></tr></table>\n")

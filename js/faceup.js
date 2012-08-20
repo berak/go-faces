@@ -1,6 +1,3 @@
-canvas = document.getElementById("can");
-ctx = canvas.getContext("2d");
-ctx.fillRect(0,0,90,90)
 
 
 if (XMLHttpRequest.prototype.sendAsBinary === undefined) {
@@ -12,16 +9,11 @@ if (XMLHttpRequest.prototype.sendAsBinary === undefined) {
   };
 }
 
-function createDocument(html) {
-    var doc = document.implementation.createDocument ('http://www.w3.org/1999/xhtml', 'html',  null);
-    doc.documentElement.innerHTML = html;
-    return doc;
-}
 
 function postCanvasToURL() {
 	document.getElementById("submit").style.visibility = "hidden"
 	var type = "image/jpeg"
-	var data = canvas.toDataURL(type);
+	var data = document.getElementById("can").toDataURL(type);
 	if ( ! data ) return
 	data = data.replace('data:' + type + ';base64,', '');
 
@@ -34,34 +26,69 @@ function postCanvasToURL() {
 			document.getElementById("compres").innerHTML = xhr.responseText
 		}
 	}
+	var  n = document.getElementById("n").value
 	var fn = document.getElementById("f").value
 	var boundary = 'ohaiimaboundary';
 	xhr.setRequestHeader('Content-Type', 'multipart/form-data; boundary=' + boundary);
 	xhr.sendAsBinary([
 		'--' + boundary,
+		'Content-Disposition: form-data; name="n"',
+		'',
+		n,
+		'--' + boundary,
 		'Content-Disposition: form-data; name="f"; filename="' + fn + '"',
 		'Content-Type: ' + type,
 		'',
 		atob(data),
-		'--' + boundary,
+		'--' + boundary + "--", 
 		''
 	].join('\r\n'));
 }
 
+//~ function detectim() {
+	//~ if ( document.getElementById("u").value )
+		//~ document.getElementById("download").style.visibility = "visible"
+//~ }
 
 function loadim() {
-	document.getElementById("submit").style.visibility = "hidden"
-	var matchim = document.getElementById("f")
 	var co = document.getElementById("compout")
+	co.innerHTML = "processing.."	
+	document.getElementById("n").value = ""
+	document.getElementById("n").style.visibility = "hidden"
+	document.getElementById("submit").style.visibility = "hidden"
+	//~ document.getElementById("download").style.visibility = "hidden"
+	var face_ctx = document.getElementById("can").getContext("2d");
+	face_ctx.fillRect(0,0,90,90)
+	
 	var image = new Image();
-	image.src = matchim.files[0].getAsDataURL()
-	image.onload = function () {
-		ctx.fillRect(0,0,90,90)
+	//~ if ( islocal ) {
+		var matchim = document.getElementById("f")
+		image.src = matchim.files[0].getAsDataURL()
+	//~ } else {
+		//~ var matchurl = document.getElementById("u").value
+		//~ image.src = matchurl
+		//~ image.tagName = "img"
+	//~ }
+	if ( !image.src )  { 
+		co.innerHTML = "invalid image src"
+		return false
+	}
 
-		var comp = ccv.detect_objects({ "canvas" : ccv.grayscale(ccv.pre(image)),
-										"cascade" : cascade,
-										"interval" : 5,
-										"min_neighbors" : 1 });
+	co.innerHTML = "loading.."	
+	image.onload = function () {
+		co.innerHTML = "detecting.."
+		var comp = []
+		try {
+			var aa = ccv.pre(image)
+			var bb = ccv.grayscale(aa)
+			comp = ccv.detect_objects({ "canvas" : bb,
+											"cascade" : cascade,
+											"interval" : 5,
+											"min_neighbors" : 1 });
+		} catch(e) {
+			co.innerHTML = "face detect faild." + e
+			return
+		}
 										
 		co.innerHTML = comp.length  + " faces found.<br>"
 		if( comp.length  > 0 ) {
@@ -73,12 +100,13 @@ function loadim() {
 				h += h/4
 			}
 			co.innerHTML += "[" + x + "," + y + "," + w + "," + h + "]<br>\n"
-			ctx.drawImage(image, x,y,w,h, 0,0,90,90);
+			face_ctx.drawImage(image, x,y,w,h, 0,0,90,90);
 			document.getElementById("submit").style.visibility = "visible"
+			document.getElementById("n").style.visibility = "visible"
 		}
 	}	
-	image.onerror = function (e,url,line) {
-		alert("eerrr " + e.message + " : " + line + " : " + url)
+	image.onerror = function () {
+		co.innerHTML = "image load faild." + image.src.substring(0,20)
 	}
 	return true;
 }
