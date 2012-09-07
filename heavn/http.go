@@ -173,7 +173,8 @@ func compare(match string, hist *Histogram) (compres string) {
     mm := 0.0
     for n,h := range persons {
         if match == n { continue }
-        dist := norml2(h,hist)
+        //~ dist := norml2(h,hist)
+        dist := chi_square(h,hist)
         kv[i] = KV{p:n,d:dist}
         mm = math.Max(mm,dist)
         i += 1

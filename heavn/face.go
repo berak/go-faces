@@ -209,6 +209,18 @@ func norml2(a, b *Histogram) float64 {
     return math.Sqrt(float64(dist))
 }
 
+func chi_square(a, b *Histogram ) float64 {
+    if len(*a) != len(*b) {return -1}
+    dist := 0.0
+    for ai, av := range *a {
+        sum := float64(av) + float64((*b)[ai])
+        dif := float64(av) - float64((*b)[ai])
+        if (sum>0) {
+            dist += dif*dif/sum
+        }
+    }
+    return dist
+}
 
 
 //
