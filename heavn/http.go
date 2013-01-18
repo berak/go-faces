@@ -76,7 +76,8 @@ func listDict() string {
     arr := make(KSarr,lp)    
     for a, _ := range(persons) {
         arr[i]=a;
-        if i+=1; i>=1000 { break }
+        //if i+=1; i>=1000 { break }
+        i+=1;
     }
     sort.Sort(arr)
     for i=0; i<len(arr); i++ {
@@ -160,7 +161,7 @@ type KV struct {
     d float64
 }
 type KVarr []KV 
-func (s KVarr) Len() int            { return len(s) }
+func (s KVarr) Len() int           { return len(s) }
 func (s KVarr) Less(i, j int) bool { return s[i].d < s[j].d }
 func (s KVarr) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 
@@ -183,7 +184,7 @@ func compare(match string, hist *Histogram) (compres string) {
     for i=0; i<int(math.Min(10.0,float64(len(kv)))); i++ {
         confidence := 1.0-(kv[i].d/mm)
         zz:=""; 
-        if confidence > 0.59 { zz = "style='border-style:solid;'"}
+        if confidence > 0.72 { zz = "style='border-style:solid;'"}
         compres += fmt.Sprintf("&nbsp;&nbsp;<a href='/?match=%v' title='%v : %3.3f'><img src='/thumb?id=%v' %v></a>\n", kv[i].p, kv[i].p, confidence, kv[i].p, zz) 
     }
     return 

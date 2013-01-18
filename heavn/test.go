@@ -103,6 +103,9 @@ func main() {
         if flag.Arg(3) == "chi" {
             distfunc = chi_square
         }
+        if flag.Arg(3) == "chi2" {
+            distfunc = chi_square2
+        }
     }
 
     var sample Sampler = square

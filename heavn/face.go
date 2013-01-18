@@ -222,6 +222,19 @@ func chi_square(a, b *Histogram ) float64 {
     return dist
 }
 
+func chi_square2(a, b *Histogram ) float64 {
+    if len(*a) != len(*b) {return -1}
+    dist := 0.0
+    for ai, av := range *a {
+        sum :=               float64((*b)[ai])
+        dif := float64(av) - float64((*b)[ai])
+        if (sum>0) {
+            dist += dif*dif/sum
+        }
+    }
+    return dist
+}
+
 
 //
 // preprocess the indexing [see init()]:
@@ -230,6 +243,8 @@ func chi_square(a, b *Histogram ) float64 {
 func bit(b, i uint8) bool {
     return ((b & (1 << i)) != 0)
 }
+
+// walk the bitmask and count ups/downs
 func uniform(way uint8) bool {
     cu := 0
     if bit(way, 0) != bit(way, 1) {    cu += 1    }
