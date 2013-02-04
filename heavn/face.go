@@ -171,6 +171,33 @@ func elbp(m *Matrix, pos,radius int) (way uint8) {
 }
 
 //
+// equalize luminance with normalized histogram
+//
+func (m *Matrix) equalize_hist() {
+    hist_sz := 256
+    img_sz  := m.h * m.w
+    hist    := make(Histogram, hist_sz)
+    
+    for i:=0; i<img_sz; i++ {
+        hist[ m.e[i] ] ++
+    }
+
+    scale := 255.0 / float64(img_sz);
+    lut   := make([]uint8, hist_sz)
+    sum   := float64(0)
+    
+    for i:=0; i<hist_sz; i++ {
+        sum += float64(hist[i])
+        lut[i] = uint8( math.Floor(0.5 + sum*scale) )
+    }
+
+    lut[0] = 0
+    for i:=0; i<img_sz; i++ {
+        m.e[i] = lut[m.e[i]]
+    }
+}
+
+//
 // unified spatial(7x7) histogram with preprocessed indices
 //
 func (m *Matrix) histogram(sample Sampler, radius int) *Histogram {

@@ -219,14 +219,16 @@ func handler(w http.ResponseWriter, r *http.Request) {
                 im = Resize(im, b, 90, 90)
                 m  = handleImage( im )
                 if m != nil {
+                    // it's a new one, so save a thumbnail
+                    buf.Reset()
+                    jpeg.Encode(&buf, Resize(im, im.Bounds(), 50, 50), nil)
+                    thumb := Thumbnail{ Name:name, Pic:buf.Bytes()}
+                    datastore.Put(c, datastore.NewIncompleteKey(c, "Thumbnail", nil), &thumb) 
+                    
+                    m.equalize_hist()
                     hist = m.histogram(circle, 1)
                     persons[name] = hist
                 }
-                // it's a new one, so save a thumbnail
-                buf.Reset()
-                jpeg.Encode(&buf, Resize(im, im.Bounds(), 50, 50), nil)
-                thumb := Thumbnail{ Name:name, Pic:buf.Bytes()}
-                datastore.Put(c, datastore.NewIncompleteKey(c, "Thumbnail", nil), &thumb)                          
             } else {
                 c.Warningf("%v",err)
             }

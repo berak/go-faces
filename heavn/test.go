@@ -88,7 +88,7 @@ func main() {
         path = flag.Arg(0)
     }
 
-    an := "square"
+    an := "circle"
     if flag.NArg() > 1 {
         an = flag.Arg(1)
     }
@@ -98,8 +98,11 @@ func main() {
         radius,_ = strconv.Atoi(flag.Arg(2))
     }
 
-    distfunc := norml2
+    distfunc := chi_square
     if flag.NArg() > 3 {
+        if flag.Arg(3) == "l2" {
+            distfunc = norml2
+        }
         if flag.Arg(3) == "chi" {
             distfunc = chi_square
         }
@@ -131,6 +134,7 @@ func main() {
             continue
         }
         m := handle(im, im.Bounds())
+        //m.equalize_hist()
         hist := m.histogram(sample, radius)
         persons[d.Name()] = hist
         if i > 600 { break }
@@ -150,6 +154,7 @@ func main() {
             continue
         }
         m := handle(im, im.Bounds())
+        //m.equalize_hist()
         hist := m.histogram(sample, radius)
         persons[d.Name()] = hist
         best,confidence := compare(d.Name(),hist,distfunc)
