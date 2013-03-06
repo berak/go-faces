@@ -47,8 +47,16 @@ func getbit(m *Matrix, pos int, cen uint8) uint8 {
     }
     return 0
 }
+func rectbit(m *Matrix, pos int, cen uint8) (uint8) {
+    way := getbit(m, pos, cen)
+    way += getbit(m, pos+1, cen)
+    way += getbit(m, pos+m.w, cen)
+    way += getbit(m, pos+m.w+1, cen)
+    if way >= 2 { return 1 }
+    return 0
+}
 
-// Sampler
+// Sampler (olbp)
 func square(m *Matrix, pos,radius int) (way uint8) {
     cen := m.e[pos]
     way = 0
@@ -63,7 +71,7 @@ func square(m *Matrix, pos,radius int) (way uint8) {
     return
 }
 
-// Sampler
+// Sampler (hardcoded 8,2 elbp)
 func circle(m *Matrix, pos,radius int) (way uint8) {
     cen := m.e[pos]
     tmpway := uint8(0)
@@ -103,15 +111,7 @@ func circle(m *Matrix, pos,radius int) (way uint8) {
     return
 }
 
-func rectbit(m *Matrix, pos int, cen uint8) (uint8) {
-    way := getbit(m, pos, cen)
-    way += getbit(m, pos+1, cen)
-    way += getbit(m, pos+m.w, cen)
-    way += getbit(m, pos+m.w+1, cen)
-    if way >= 2 { return 1 }
-    return 0
-}
-// Sampler
+// Sampler (olbp variant that interpolates for all points, nut just the corners)
 func square2(m *Matrix, pos,radius int) (way uint8) {
     cen := m.e[pos]
     way = 0
@@ -125,7 +125,8 @@ func square2(m *Matrix, pos,radius int) (way uint8) {
     way |= rectbit(m, pos-radius*m.w-radius,       cen) << 7
     return
 }
-// Sampler
+
+// Sampler  (variable radius, 8 neighbours) elbp
 func circle2(m *Matrix, pos,radius int) (way uint8) {
     cen := m.e[pos]
     way = 0
@@ -140,7 +141,8 @@ func circle2(m *Matrix, pos,radius int) (way uint8) {
     return
 }
 
-// Sampler
+// as reference, this is similar to the opencv one
+// Sampler  
 func elbp(m *Matrix, pos,radius int) (way uint8) {
     way = 0
     cen := m.e[pos]
@@ -182,13 +184,15 @@ func (m *Matrix) equalize_hist() {
         hist[ m.e[i] ] ++
     }
 
-    scale := 255.0 / float64(img_sz);
+    scale := 255.0 / float64(img_sz)
     lut   := make([]uint8, hist_sz)
     sum   := float64(0)
     
     for i:=0; i<hist_sz; i++ {
         sum += float64(hist[i])
-        lut[i] = uint8( math.Floor(0.5 + sum*scale) )
+        val := math.Floor(0.5 + sum*scale)
+        //if val > 255.0 { val = 255.0 }
+        lut[i] = uint8( val )
     }
 
     lut[0] = 0
@@ -202,7 +206,7 @@ func (m *Matrix) equalize_hist() {
 //
 func (m *Matrix) histogram(sample Sampler, radius int) *Histogram {
     ncell := 7
-    nhist := 57
+    nhist := 57  // + 1  aww, i lost one (actually, 2)!
     cw  := int(m.w / (ncell-1))
     ch  := int(m.h / (ncell-1))
     hist := make(Histogram, nhist*(ncell*ncell))
@@ -265,7 +269,7 @@ func chi_square2(a, b *Histogram ) float64 {
 
 //
 // preprocess the indexing [see init()]:
-// in the uniform u8 case, there are only 57 of 255 valid cases
+// in the uniform u8 case, there are only 58 of 255 valid cases
 //
 func bit(b, i uint8) bool {
     return ((b & (1 << i)) != 0)
@@ -284,10 +288,10 @@ func uniform(way uint8) bool {
     if bit(way, 7) != bit(way, 0) {    cu += 1    }
     return (cu <= 2)
 }
+
 func initIndices() {
     iu := 0
-    unindices = make([]int, 257)
-    unindices[256] = -1
+    unindices = make([]int, 256)
     for i := uint8(0); i < 0xff; i++ {
         if uniform(i) {
             unindices[i] = iu
@@ -298,6 +302,4 @@ func initIndices() {
     }
 }
 
-
-
-
+// [0 1 2 3 4 -1 5 6 7 -1 -1 -1 8 -1 9 10 11 -1 -1 -1 -1 -1 -1 -1 12 -1 -1 -1 13 -1 14 15 16 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 17 -1 -1 -1 -1 -1 -1 -1 18 -1 -1 -1 19 -1 20 21 22 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 23 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 24 -1 -1 -1 -1 -1 -1 -1 25 -1 -1 -1 26 -1 27 28 29 30 -1 31 -1 -1 -1 32 -1 -1 -1 -1 -1 -1 -1 33 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 34 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 35 36 37 -1 38 -1 -1 -1 39 -1 -1 -1 -1 -1 -1 -1 40 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 41 42 43 -1 44 -1 -1 -1 45 -1 -1 -1 -1 -1 -1 -1 46 47 48 -1 49 -1 -1 -1 50 51 52 -1 53 54 55 56 57]

@@ -5,7 +5,6 @@ import (
     "math"
     "net/http"
     "sort"
-    //~ "strconv"
     
     "appengine"
     "appengine/datastore"
@@ -14,7 +13,6 @@ import (
     "io"
     "bytes"
     "encoding/binary"
-    //~ "compress/zlib"
 
     "image"
     "image/jpeg"
@@ -37,8 +35,8 @@ func handleImage(m image.Image) (mat *Matrix) {
     mat = createMatrix(90,90)
     for y := 0; y < 90; y++ {
         for x := 0; x < 90; x++ {
-            r8,g8,b8,_ := m.At(x,y).RGBA()
-            mat.e[i] = uint8((r8>>2) + (g8>>1) + (b8>>2))
+            r,g,b,_ := m.At(x,y).RGBA()
+            mat.e[i] = uint8((r>>2) + (g>>1) + (b>>2))
             i += 1
         }
     }
@@ -65,7 +63,7 @@ func fillDict(c appengine.Context) {
 }
 
 type KSarr []string 
-func (s KSarr) Len() int            { return len(s) }
+func (s KSarr) Len() int           { return len(s) }
 func (s KSarr) Less(i, j int) bool { return s[i] < s[j] }
 func (s KSarr) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 
@@ -76,7 +74,6 @@ func listDict() string {
     arr := make(KSarr,lp)    
     for a, _ := range(persons) {
         arr[i]=a;
-        //if i+=1; i>=1000 { break }
         i+=1;
     }
     sort.Sort(arr)
@@ -225,7 +222,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
                     thumb := Thumbnail{ Name:name, Pic:buf.Bytes()}
                     datastore.Put(c, datastore.NewIncompleteKey(c, "Thumbnail", nil), &thumb) 
                     
-                    m.equalize_hist()
+                    //m.equalize_hist()
                     hist = m.histogram(circle, 1)
                     persons[name] = hist
                 }
