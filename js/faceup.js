@@ -62,17 +62,23 @@ function loadim() {
 	
 	var image = new Image();
 	//~ if ( islocal ) {
-		var matchim = document.getElementById("f")
-		image.src = matchim.files[0].getAsDataURL()
+	var matchim = document.getElementById("f")
+	//~ image.src = matchim.files[0].getAsDataURL()
+	oFReader = new FileReader(), rFilter = /^(?:image\/bmp|image\/cis\-cod|image\/gif|image\/ief|image\/jpeg|image\/jpeg|image\/jpeg|image\/pipeg|image\/png|image\/svg\+xml|image\/tiff|image\/x\-cmu\-raster|image\/x\-cmx|image\/x\-icon|image\/x\-portable\-anymap|image\/x\-portable\-bitmap|image\/x\-portable\-graymap|image\/x\-portable\-pixmap|image\/x\-rgb|image\/x\-xbitmap|image\/x\-xpixmap|image\/x\-xwindowdump)$/i;
+	oFReader.onload = function (oFREvent) {
+		image.src = oFREvent.target.result;
+		if ( !image.src )  { 
+			co.innerHTML = "invalid image src"
+			return false
+		}
+	};
+    var oFile = matchim.files[0];
+    oFReader.readAsDataURL(oFile);
 	//~ } else {
 		//~ var matchurl = document.getElementById("u").value
 		//~ image.src = matchurl
 		//~ image.tagName = "img"
 	//~ }
-	if ( !image.src )  { 
-		co.innerHTML = "invalid image src"
-		return false
-	}
 
 	co.innerHTML = "loading.."	
 	image.onload = function () {
