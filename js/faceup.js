@@ -64,13 +64,14 @@ function loadim() {
 	//~ if ( islocal ) {
 	var matchim = document.getElementById("f")
 	//~ image.src = matchim.files[0].getAsDataURL()
-	oFReader = new FileReader(), rFilter = /^(?:image\/bmp|image\/cis\-cod|image\/gif|image\/ief|image\/jpeg|image\/jpeg|image\/jpeg|image\/pipeg|image\/png|image\/svg\+xml|image\/tiff|image\/x\-cmu\-raster|image\/x\-cmx|image\/x\-icon|image\/x\-portable\-anymap|image\/x\-portable\-bitmap|image\/x\-portable\-graymap|image\/x\-portable\-pixmap|image\/x\-rgb|image\/x\-xbitmap|image\/x\-xpixmap|image\/x\-xwindowdump)$/i;
+	oFReader = new FileReader()
 	oFReader.onload = function (oFREvent) {
 		image.src = oFREvent.target.result;
 		if ( !image.src )  { 
 			co.innerHTML = "invalid image src"
 			return false
 		}
+		return true
 	};
     var oFile = matchim.files[0];
     oFReader.readAsDataURL(oFile);
@@ -92,8 +93,8 @@ function loadim() {
 											"interval" : 5,
 											"min_neighbors" : 1 });
 		} catch(e) {
-			co.innerHTML = "face detect faild." + e
-			return
+			co.innerHTML = "face detect failed." + e
+			return false
 		}
 										
 		co.innerHTML = comp.length  + " faces found.<br>"
@@ -110,9 +111,10 @@ function loadim() {
 			document.getElementById("submit").style.visibility = "visible"
 			document.getElementById("n").style.visibility = "visible"
 		}
+		return true;
 	}	
 	image.onerror = function () {
-		co.innerHTML = "image load faild." + image.src.substring(0,20)
+		co.innerHTML = "image load failed." + image.src.substring(0,20)
 	}
 	return true;
 }
